@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.dv.dscatalog.dto.CategoryDTO;
 import com.dv.dscatalog.entity.Category;
 import com.dv.dscatalog.repositories.CategoryRepository;
+import com.dv.dscatalog.services.exceptions.EntityNotFoundException;
 
 @Service
 public class CategoryService {
@@ -19,6 +20,12 @@ public class CategoryService {
 	public List<CategoryDTO> findAll() {
 		List<Category> list = repository.findAll();
 		return list.stream().map(x -> new CategoryDTO(x)).collect(Collectors.toList());
+	}
+
+	public CategoryDTO findById(Long id) {
+		Category category = repository.findById(id).orElseThrow(
+				() -> new EntityNotFoundException("Entity not found"));
+		return new CategoryDTO(category);
 	}
 	
 	
