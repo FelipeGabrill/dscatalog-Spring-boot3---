@@ -2,6 +2,8 @@ package com.dv.dscatalog.controllers;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -22,6 +24,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import com.dv.dscatalog.dto.ProductDTO;
 import com.dv.dscatalog.services.ProductService;
+import com.dv.dscatalog.services.exceptions.DatabaseException;
 import com.dv.dscatalog.services.exceptions.ResourceNotFoundException;
 import com.dv.dscatalog.tests.Factory;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,6 +44,7 @@ public class ProductControllerTests {
 	private ProductDTO productDTO;
 	private PageImpl<ProductDTO> page;
 	private long existingId;
+	private long dependentId;
 	private long nonExistingId;
 	
 	@BeforeEach
@@ -48,6 +52,7 @@ public class ProductControllerTests {
 		
 		existingId = 1L;
 		nonExistingId = 2L;
+		dependentId = 3L;
 		
 		productDTO = Factory.createProductDTO();
 		page = new PageImpl<>(List.of(productDTO));
@@ -59,7 +64,10 @@ public class ProductControllerTests {
 		
 		when(service.update(eq(existingId), any())).thenReturn(productDTO);
 		when(service.update(eq(nonExistingId), any())).thenThrow(ResourceNotFoundException.class);
-
+		
+		doNothing().when(service).delete(existingId);
+		doThrow(ResourceNotFoundException.class).when(service).delete(nonExistingId);
+		doThrow(DatabaseException.class).when(service).delete(dependentId);
 	}
 	
 	@Test
