@@ -30,9 +30,9 @@ public class CategoryService {
 
 	@Transactional(readOnly = true)
 	public CategoryDTO findById(Long id) {
-		Category category = repository.findById(id).orElseThrow(
+		Category entity = repository.findById(id).orElseThrow(
 				() -> new ResourceNotFoundException("Entity not found"));
-		return new CategoryDTO(category);
+		return new CategoryDTO(entity);
 	}
 
 	@Transactional

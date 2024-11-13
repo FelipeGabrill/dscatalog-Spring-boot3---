@@ -8,54 +8,54 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.dv.dscatalog.dto.CategoryDTO;
-import com.dv.dscatalog.dto.ProductDTO;
-import com.dv.dscatalog.entity.Category;
-import com.dv.dscatalog.entity.Product;
-import com.dv.dscatalog.repositories.CategoryRepository;
-import com.dv.dscatalog.repositories.ProductRepository;
+import com.dv.dscatalog.dto.RoleDTO;
+import com.dv.dscatalog.dto.UserDTO;
+import com.dv.dscatalog.entity.Role;
+import com.dv.dscatalog.entity.User;
+import com.dv.dscatalog.repositories.RoleRepository;
+import com.dv.dscatalog.repositories.UserRepository;
 import com.dv.dscatalog.services.exceptions.DatabaseException;
 import com.dv.dscatalog.services.exceptions.ResourceNotFoundException;
 
 import jakarta.persistence.EntityNotFoundException;
 
 @Service
-public class ProductService {
+public class UserService {
 
 	@Autowired
-	private ProductRepository repository;
+	private UserRepository repository;
 	
 	@Autowired
-	private CategoryRepository categoryRepository;
+	private RoleRepository roleRepository;
 	
 	@Transactional(readOnly = true)
-	public Page<ProductDTO> findAllPaged(Pageable pageable) {
-		Page<Product> list = repository.findAll(pageable);
-		return list.map(x -> new ProductDTO(x));
+	public Page<UserDTO> findAllPaged(Pageable pageable) {
+		Page<User> list = repository.findAll(pageable);
+		return list.map(x -> new UserDTO(x));
 	}
 
 	@Transactional(readOnly = true)
-	public ProductDTO findById(Long id) {
-		Product entity = repository.findById(id).orElseThrow(
+	public UserDTO findById(Long id) {
+		User entity = repository.findById(id).orElseThrow(
 				() -> new ResourceNotFoundException("Entity not found"));
-		return new ProductDTO(entity, entity.getCategories());
+		return new UserDTO(entity);
 	}
 
 	@Transactional
-	public ProductDTO insert(ProductDTO dto) {
-		Product entity = new Product();
+	public UserDTO insert(UserDTO dto) {
+		User entity = new User();
 		copyDtoToEntity(dto, entity);
 		entity = repository.save(entity);
-		return new ProductDTO(entity);
+		return new UserDTO(entity);
 	}
 
 	@Transactional
-	public ProductDTO update(Long id, ProductDTO dto) {
+	public UserDTO update(Long id, UserDTO dto) {
 		try {
-			Product entity = repository.getReferenceById(id);
+			User entity = repository.getReferenceById(id);
 			copyDtoToEntity(dto, entity);
 			entity = repository.save(entity);
-			return new ProductDTO(entity);
+			return new UserDTO(entity);
 		} catch (EntityNotFoundException e) {
 			throw new ResourceNotFoundException("Id not found " + id);
 		}	
@@ -74,17 +74,15 @@ public class ProductService {
 	   	}
 	}
 	
-	private void copyDtoToEntity(ProductDTO dto, Product entity) {
-		entity.setName(dto.getName());
-		entity.setDescription(dto.getDescription());
-		entity.setPrice(dto.getPrice());
-		entity.setDate(dto.getDate());
-		entity.setImgUrl(dto.getImgUrl());
+	private void copyDtoToEntity(UserDTO dto, User entity) {
+		entity.setFirstName(dto.getFirstName());
+		entity.setLastName(dto.getLastName());
+		entity.setEmail(dto.getEmail());
 		
-		entity.getCategories().clear();
-		for(CategoryDTO catDto : dto.getCategories()) {
-			Category category = categoryRepository.getReferenceById(catDto.getId());
-			entity.getCategories().add(category);
+		entity.getRoles().clear();
+		for(RoleDTO roleDto : dto.getRoles()) {
+			Role role = roleRepository.getReferenceById(roleDto.getId());
+			entity.getRoles().add(role);
 		}
 	}
 }
