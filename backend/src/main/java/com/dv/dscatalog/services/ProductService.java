@@ -1,5 +1,7 @@
 package com.dv.dscatalog.services;
 
+import java.util.Arrays;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -12,6 +14,7 @@ import com.dv.dscatalog.dto.CategoryDTO;
 import com.dv.dscatalog.dto.ProductDTO;
 import com.dv.dscatalog.entity.Category;
 import com.dv.dscatalog.entity.Product;
+import com.dv.dscatalog.projections.ProductProjection;
 import com.dv.dscatalog.repositories.CategoryRepository;
 import com.dv.dscatalog.repositories.ProductRepository;
 import com.dv.dscatalog.services.exceptions.DatabaseException;
@@ -86,5 +89,10 @@ public class ProductService {
 			Category category = categoryRepository.getReferenceById(catDto.getId());
 			entity.getCategories().add(category);
 		}
+	}
+
+	@Transactional(readOnly = true)
+	public Page<ProductProjection> testQuery(Pageable pageable) {
+		return repository.searchProducts(Arrays.asList(1L, 3L), "ma", pageable);
 	}
 }
