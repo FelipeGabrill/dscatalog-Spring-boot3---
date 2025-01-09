@@ -31,6 +31,7 @@ public class UserController {
 	@Autowired
 	private UserService service;
 	
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping
 	public ResponseEntity<Page<UserDTO>> findAll(Pageable pageable) {		
 		Page<UserDTO> list = service.findAllPaged(pageable);
@@ -42,7 +43,14 @@ public class UserController {
 		UserDTO dto = service.findById(id);
 		return ResponseEntity.ok().body(dto);
 	}
-
+	
+	@PreAuthorize("hasAnyRole('ROLE_OPERATOR', 'ROLE_ADMIN')")
+	@GetMapping(value = "/me")
+	public ResponseEntity<UserDTO> findMe() {
+		UserDTO dto = service.findMe();
+		return ResponseEntity.ok().body(dto);
+	}
+	
 	@PostMapping
 	public ResponseEntity<UserDTO> insert(@Valid @RequestBody UserInsertDTO dto) {
 		UserDTO newDto = service.insert(dto);
